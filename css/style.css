@@ -1,0 +1,66 @@
+/* Demo styles */
+
+/* CUSTOM TOOLTIP */
+
+.table-header {
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 500;
+      color: #999;
+      margin-bottom: 3px;
+}
+.bar {
+	display: block;
+	background-color: #d991b2;
+	height: 18px;
+}
+.bar.active {
+	background-color: #bb2b77;
+}
+
+
+/* LEGENDS */
+
+.legend {
+	margin: 10px 0;
+}
+.legend.legend-horizontal > div {
+	display: inline-block;
+}
+.legend .legend-box {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	vertical-align: top;
+}
+.legend .legend-value {
+	display: inline-block;
+	margin: -1px 8px 5px 5px;
+	vertical-align: top;
+}
+
+.legend .latitude {
+	background-color: #c6e2ba;
+}
+.legend .longitude {
+	background-color: #c9e2f5;
+}
+
+/* ACTIVE BOX */
+
+#custom-layout g.active {
+	cursor: crosshair;
+}
+#custom-layout g.active text {
+    fill: #800000 !important;
+    font-size: 120% !important;
+    font-weight: 600;
+}
+
+
+/* PAGE STYLES */
+
+pre, code {
+	overflow-wrap: normal;
+	max-height: 500px;
+}
