@@ -1,0 +1,44 @@
+@import 'squaire-tip';
+
+.squaire {
+
+	rect {
+		stroke-width: 2;
+		stroke: #fff;
+		fill: #eee;
+	}
+	
+	text {
+		alignment-baseline: central;
+		text-anchor: middle;
+		fill: #333;
+		font-size: 14px;
+		pointer-events: none;
+		//font-family: sans-serif;
+	}
+
+	// breakpoints
+	&[data-breakpoint="large"] {
+
+	}
+	&[data-breakpoint="medium"] {
+		text {
+			font-size: 13px;
+		}
+	}
+	&[data-breakpoint="small"] {
+		text {
+			font-size: 12px;
+		}
+	}
+	&[data-breakpoint="small-xsmall"] {
+		text {
+			font-size: 10px;
+		}
+	}
+	&[data-breakpoint="small-thumbnail"] {
+		text {
+			display: none;
+		}
+	}
+}

@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	
+		<title>Squaire.js</title>
+	    <meta name="title" content="Squaire.js" />
+	    <meta property="og:title" content="Squaire.js" />
+	    <meta name="twitter:title" content="Squaire.js" />
+	
+	    <meta name="description" content="Square bin map library from The Wall Street Journal.">
+	    <meta property="og:description" content="Square bin map library from The Wall Street Journal." />
+		<meta name="twitter:description" content="Square bin map library from The Wall Street Journal.">
+	
+		<link rel="image_src" href="http://wsj.github.io/squaire/img/example.png" />
+		<meta property="og:image" content="http://wsj.github.io/squaire/img/example.png" />
+		<meta name="twitter:image:src" content="http://wsj.github.io/squaire/img/example.png" />
+	
+		<link rel="canonical" href="http://wsj.github.io/squaire/">
+		<meta property="og:url" content="http://wsj.github.io/squaire/">
+	
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta name="format-detection" content="telephone=no">
+	
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/prism.css"/>
+		<link rel="stylesheet" href="dist/squaire.css"/>
+		<link rel="stylesheet" href="css/style.css"/>
+	
+	</head>
+	<body>
+	
+        <div class="container">
+	
+			<header>
+                <h1>Squaire.js <small>Square bin map library from <em>The Wall Street Journal</em></small><h1>
+                <h5><a href="https://github.com/wsj/squaire">Code and documentation available on GitHub</a></h5>
+				<ol class="breadcrumb pull-left">
+				  <li><a href="#quick-start-demo">Quick start</a></li>
+				  <li><a href="#custom-tooltip-demo">Custom tooltip</a></li>
+				  <li><a href="#custom-layout-demo">Custom layout</a></li>
+				</ol>
+            </header>
+	
+	
+			<div class="row">
+				<div id="quick-start-demo" class="col-xs-12">
+					<h3>Quick start</h3>
+					<p><span class="label label-info">Features</span> Quick start example from documentation. No data boxes, default layout, numeric data with labels, no tooltips.</p>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					<pre><code class="language-javascript">
+var quickData = { 
+	"NY" : { "value": "$4" },
+	"AL" : { "value": "$1" }
+};
+var quickMap = new Squaire(quickData, {
+	colors: d3.scale.quantize().domain([1,5]).range(['#c9e2f5','#0098db'])
+});
+					</code></pre>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					<div id="map-container"></div>
+				</div>
+
+
+				<div id="custom-tooltip-demo" class="col-xs-12">
+					<hr>
+					<h3>Custom tooltip, update method</h3>
+					<p><span class="label label-info">Features</span> Data loaded from tsv, custom tooltip, update, quantitative data with units, legend, classIndex.</p>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					<pre><code class="language-javascript">
+var tooltipData = {},
+	tooltipMap,
+	tooltipIndex = 'Population',
+	tooltipColors,
+	tooltipRepresentativesExtent;
+
+//get max/min of a column of numeric data
+function getExtent(index) {
+	var values = Object.keys(tooltipData).map(function (key) {
+			return tooltipData[key][index];
+		});
+	return d3.extent(values, function(d){ return +d.replace(/[^\d-\.]/gi,''); });
+}
+
+//get max/min of values in bar chart
+function getBarExtent(){
+	var repExtent = getExtent("Representatives"),
+		electoralExtent = getExtent("Electoral Votes");
+	return [d3.min([repExtent[0],electoralExtent[0]]), d3.max([repExtent[1],electoralExtent[1]])];
+}
+
+function updateLegend(extent, colors, index){
+	var html = '<span class="legend-value">'+extent[0]+'</span>';
+	html += colors.map(function(color, i){
+		return '<span class="legend-box" style="background-color:'+color+';"></span>';
+	}).join('');
+	html += '<span class="legend-value">'+extent[1]+' min</span>';
+	$('#custom-tooltip-demo .legend').html(html);
+}
+
+function getTooltipColorScale(index) {
+	var extent = getExtent(index),
+		colors = ['#e6eff9','#c9e2f5','#95cbee','#0098db','#0079ae'],
+		colorScale = d3.scale.quantize()
+			.domain(extent)
+			.range(colors);
+	updateLegend(extent, colors, index);
+	return colorScale;
+}
+
+d3.tsv("data/custom-tooltip.tsv", function(r){
+	// write values to object using id as proprety name
+	// id is the column name in the spreadsheet that maps to the layout and labels -- U.S. state two-letter abbreviations in default squaire.js settings
+	tooltipData[r.State] = r;
+	//remove id from dictionary values
+	delete tooltipData[r.State].State; 
+	return r;
+}, function(csv) {
+	//callback when file loaded and data formatted
+	tooltipColors = getTooltipColorScale(tooltipIndex);
+	tooltipRepresentativesExtent = getBarExtent();
+	//init map
+	tooltipMap = new Squaire(tooltipData, {
+		el: "#custom-tooltip",
+		index: tooltipIndex,
+		labelStyle: "ap",
+		colors: tooltipColors,
+		classIndex: "landlocked",
+		tooltip: {
+			enabled: true,
+			mode: 'toggle',
+			el: "#custom-tooltip-toolbox",
+			layout: tooltipBarLayout,
+			whitelist: ["Population","Total Area", "Land Area","State Bird"],
+			column1: 'Category',
+			column2: 'Value'
+		}
+	});
+});
+
+// specialized tooltip layout with bar chart in table
+var bars = ["Representatives","Electoral Votes"];
+
+function tooltipBarLayout(d) {
+	var html = '<h6>'+tooltipMap.options.labels[d.box].full+'</h6>' + '<table class="table">';
+	if(tooltipMap.options.tooltip.column1 || tooltipMap.options.tooltip.column2) {
+		html += '<tr><th>'+tooltipMap.options.tooltip.column1+'</th><th>'+tooltipMap.options.tooltip.column2+'</th></tr>';
+	}
+	tooltipMap.options.tooltip.whitelist.forEach(function(column) {
+		//check data is defined
+		if(d.data!==undefined && d.data.hasOwnProperty(column) && d.data[column]!==false && d.data[column]!=='') {
+			var data = isNaN(d.data[column]) ? d.data[column] : parseFloat(d.data[column]).toFixed(0);
+			html += '<tr><td>'+column+'</td><td>'+data+'</td></tr>';
+		}
+	});
+	html += '</table>';
+		html += '<table class="table table-bar hang">';
+		bars.forEach(function(item) {
+			var value = d.data[item];
+			html += '<tr><td>'+item+'</td><td>'+value+'</td><td><div class="bar'+ (item===d.index ? ' active' : '') +'" style="width:'+((value ? value : 0)/tooltipRepresentativesExtent[1]*100)+'%"></div></td></tr>';
+		});
+		html += '</table>';
+	return html;
+}
+
+var $buttons = $('.toggle-data-buttons');
+//change map via buttons
+$buttons.on('click', 'button', function(){
+	$buttons.find('.btn-primary').removeClass('btn-primary');
+	var index = $(this).addClass('btn-primary').data('index'),
+		colorScale = getTooltipColorScale(index);
+
+	tooltipMap.update(false, {
+		index: index,
+		colors: colorScale
+	});
+
+});
+					</code></pre>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					<div class="toggle-data-buttons">
+						<button type="button" autocomplete="off" class="btn btn-default btn-primary" data-index="Population">Population</button>
+						<button type="button" autocomplete="off" class="btn btn-default" data-index="Land Area">Land Area</button>
+					</div>
+					<div class="legend legend-horizontal legend-scale"></div>
+
+					<div id="custom-tooltip"></div>
+					<div id="custom-tooltip-toolbox" class="squaire-toolbox"></div>
+				</div>
+
+				<div id="custom-layout-demo" class="col-xs-12">
+					<hr>
+					<h3>Custom layout, default tooltip</h3>
+					<p><span class="label label-info">Features</span> Custom layout and labels, JSON data, orginal color scale, string indexType, default layout static tooltip with whitelist, noteIndex, legend, styled <code>.active</code> class, different breakpoint.</p>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					<pre><code class="language-javascript">
+var customLabels = {
+	"N" : {
+		"full"  : "North", //used in tooltip
+		"short" : "N", //used in small breakpoint
+		"ap"    : "N" //label format used in larger breakpoints. Can be renamed from "ap" if option `labelStyle` is changed to match or not included if `labelStyle` is set to "full" or "short".
+	},
+	"E" : {
+		"full"  : "East",
+		"short" : "E"
+	},
+	"S" : {
+		"full"  : "South",
+		"short" : "S"
+	},
+	"W" : {
+		"full"  : "West",
+		"short" : "W"
+	}
+}
+
+var customData = { 
+	"N" : { 
+		"Direction": "Longitude",
+		"Fun fact": "Compasses love me",
+		"note": "Also, the north star."
+	},
+	"E" : { 
+		"Direction": "Latitude",
+		"Fun fact": "Where the sun rises"
+	},
+	"S" : { 
+		"Direction": "Longitude",
+		"Fun fact": "Come to me for penguins"
+	},
+	"W" : { 
+		"Direction": "Latitude",
+		"Fun fact": "Where the sun sets"
+	}
+};
+
+var customMap = new Squaire(customData, {
+	el: "#custom-layout",
+	layout: ",N,\nW,,E\n,S,",
+	labels: customLabels,
+	labelStyle: "full",
+	index: "Direction",
+	indexType: "string",
+	colors: d3.scale.ordinal(["Longitude","Latitude"]).range(["#c9e2f5","#c6e2ba"]),
+	tooltip: {
+		enabled: true,
+		mode: "static",
+		el: "#custom-layout-toolbox",
+		whitelist: ["Fun fact"],
+		noteIndex: "note"
+	},
+	breakpoints: {
+		"small": 300
+	}
+});
+					</code></pre>
+				</div>
+				<div class="col-sm-4 col-sm-offset-1 col-xs-6 col-xs-offset-3">
+					<div class="legend legend-horizontal">
+						<div><span class="legend-box latitude"></span> <span class="legend-value">Latitude</span></div>
+						<div><span class="legend-box longitude"></span> <span class="legend-value">Longitude</span></div>
+					</div>
+					<div id="custom-layout"></div>
+					<div id="custom-layout-toolbox"></div>
+				</div>
+
+			</div>
+			<br>
+
+			<footer>
+                
+                <p>All code released under the <a href="https://github.com/wsj/squaire/blob/master/LICENSE">ISC license</a>. Pull requests welcomed.</p>
+                <p>Developed at <em>The Wall Street Journal</em> by Sarah Squire.</p>
+                
+            </footer>
+	
+        </div><!-- .container -->
+	
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+		<script src="dist/squaire.js"></script>
+		<script src="js/prism.js"></script>
+		<script src="js/data.js"></script>
+		<script src="js/script.js"></script>
+	
+	</body>
+</html>

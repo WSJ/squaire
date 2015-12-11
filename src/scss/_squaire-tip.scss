@@ -1,0 +1,140 @@
+// dynamic and static tooltips
+.squaire-tooltip, .squaire-toolbox {
+	//font-family: sans-serif;
+	font-size: 12px;
+	h1,h2,h3,h4,h5,h6{
+		margin:0;
+	}
+	h6 {
+		font-size: 14px;
+		margin-bottom: 3px;
+	}
+	p{
+		margin:3px 0;
+	}
+	.tooltip-note {
+		padding: 6px 0 0;
+		border-top: 1px solid #ddd;
+	}
+	table.table {
+ 		margin: 0;
+  		font-size: 12px;
+        width: 100%;
+        max-width: 100%;
+        border-collapse: collapse;
+		border-spacing: 0;
+		td,th{
+			padding:3px;
+			border-top: 1px solid #ddd;
+			&:first-child {
+				padding-left: 0;
+			}
+			&:last-child {
+				padding-right: 0;
+			}
+		}
+	}
+	table.table-bar {
+		td:last-child {
+			width: 100%;
+		}
+	}
+    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+        line-height: 1.42857143;
+        vertical-align: top;
+    }
+    th {
+    	text-transform:uppercase;
+		font-size:10px;
+		font-weight:500;
+		color:#999999;
+        text-align: left;
+    }
+	table.table td:last-child, table.table th:last-child {
+		text-align: right;
+	}
+}
+
+//dynamic tooltip (background, border, overlay)
+.squaire-tooltip {
+	background-color:rgba(255,255,255,.95);
+	box-shadow:0;
+	border:1px solid #a8a7a5;
+	padding:8px;
+	max-width: 200px;
+	&:after, &:before {
+		top: 100%;
+		left: 50%;
+		border: solid transparent;
+		content: " ";
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+	}
+	&:after {
+		border-color: rgba(255, 255, 255, 0);
+		border-top-color: rgba(255,255,255,.95);
+		border-width: 8px;
+		margin-left: -8px;
+	}
+	&:before {
+		border-color: rgba(168, 167, 165, 0);
+		border-top-color: #696866;
+		border-width: 9px;
+		margin-left: -9px;
+	}
+	
+	// tooltip arrow depending on direction
+	&.w{
+		&:after, &:before {
+			top: 50%;
+			left: 100%;
+		}
+		&:after {
+			border-color: rgba(255, 255, 255, 0);
+			margin: 0px;
+			border-left-color: rgba(255,255,255,.95);
+			margin-top: -7px;
+		}
+		&:before {
+			border-color: rgba(168, 167, 165, 0);
+			margin: 0px;
+			border-left-color: #696866;
+			margin-top: -8px;
+		}
+	}
+	&.e{
+		&:after, &:before {
+			top: 50%;
+			left: 0%;
+		}
+		&:after {
+			border-color: rgba(255, 255, 255, 0);
+			border-right-color: rgba(255,255,255,.95);
+			margin-left: -16px;
+			margin-top: -7px;
+		}
+		&:before {
+			border-color: rgba(168, 167, 165, 0);
+			border-right-color: #696866;
+			margin-left: -18px;
+			margin-top: -8px;
+		}
+	}
+	&.s{
+		&:after, &:before {
+			top: 0%;
+		}
+		&:after {
+			border-color: rgba(255, 255, 255, 0);
+			border-bottom-color: rgba(255,255,255,.95);
+			margin-top: -16px;
+		}
+		&:before {
+			border-color: rgba(168, 167, 165, 0);
+			border-bottom-color: #696866;
+			margin-top: -18px;
+		}
+	}
+}
